@@ -1,0 +1,49 @@
+﻿@using System.Data
+@using Api.Controllers
+@{
+    ViewBag.Title = "Edit Data";
+    var bloodServicesTable = ViewBag.SelectedBlood as DataTable;
+    var servicesTable = ViewBag.ServicesTable as DataTable;
+}
+<head>
+  <script src="https://cdn.jsdelivr.net/jsbarcode/3.6.0/JsBarcode.all.min.js"></script>
+</head>
+<h2>Edit Data</h2>
+@if (bloodServicesTable != null && bloodServicesTable.Rows.Count > 0)
+{
+    var selectedServices = new List<string>();
+    foreach (DataRow row in bloodServicesTable.Rows)
+    {
+        selectedServices.AddRange(row["service"].ToString().Split(',').Select(x => x.Trim()));
+    }
+    selectedServices = selectedServices.Distinct().ToList();
+    var i = 0;
+    var row1 = bloodServicesTable.Rows[i]; // получаем первую запись
+
+    <h3>Blood ID: @row1["blood"]</h3>
+    <p>Date: @DateTimeOffset.FromUnixTimeMilliseconds((long)row1["date"]).DateTime.ToString("yyyy-MM-dd")</p>
+    <p>Patient: @row1["patient"]</p>
+    <p>Barcode: <svg id="barcode"></svg></p>
+
+    <form method="post" asp-action="UpdateServices">
+        <input type="hidden" name="id" value="@row1["blood"]" />
+        @foreach (DataRow serviceRow in servicesTable.Rows)
+        {
+            var serviceCode = serviceRow["Code"].ToString();
+            var serviceName = serviceRow["Service"].ToString();
+            var isChecked = selectedServices.Contains(serviceCode);
+            <div>
+                <input type="checkbox" name="services[]" value="@serviceCode" @(isChecked ? "checked" : "") />
+                <label>@serviceName</label>
+            </div>
+        }
+        <button type="submit">Save</button>
+    </form>
+
+    <script>
+        console.log("aaaaaa")
+        var barcodeStr = @row1["barcode"]; // получаем строку для штрих-кода из данных модели
+        JsBarcode("#barcode", barcodeStr, {width: 1.5, height: 40}); // рисуем штрих-код на элементе с id="barcode"
+        console.log("bbbbb")
+    </script>
+}

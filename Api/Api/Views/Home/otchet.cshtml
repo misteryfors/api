@@ -1,0 +1,32 @@
+﻿<h2>Выберите период и тип отчета</h2>
+
+@using (Html.BeginForm())
+{
+    <div class="form-group">
+        <label for="start-date">Начальная дата:</label>
+        <input type="date" id="start-date" name="start-date">
+    </div>
+    <div class="form-group">
+        <label for="end-date">Конечная дата:</label>
+        <input type="date" id="end-date" name="end-date">
+    </div>
+    <div class="form-group">
+        <label for="report-type">Тип отчета:</label>
+        <select id="report-type" name="report-type">
+            <option value="services">Количество оказанных услуг</option>
+            <option value="services-list">Перечень услуг</option>
+            <option value="patients">Количество пациентов</option>
+            <option value="patients-per-service">Количество пациентов в день по каждой услуге</option>
+            <option value="average-results">Средний результат исследования в день по выбранному периоду</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="output-format">Формат вывода:</label>
+        <select id="output-format" name="output-format">
+            <option value="chart">График</option>
+            <option value="table">Таблица</option>
+            <option value="chart-and-table">График и таблица</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Построить отчет</button>
+}

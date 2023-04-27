@@ -1,0 +1,123 @@
+﻿@{
+    // Получаем значение из сессии по ключу "key"
+   var name = Context.Session.GetString("name");
+   var type = Context.Session.GetString("type");
+   var duration = Context.Session.GetString("lastActive");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Api</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Api.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Api</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">@name   @type</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="an">an</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="login">login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="BloodData">otchet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="patientData">patientData</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="serviceData">serviceData</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="otchet">otchet</a>
+                        </li>
+                        <div id="timer"></div>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - Api - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <script>
+    function startTimer(duration, display) {
+        var timer = duration, hour, minutes, seconds;
+        setInterval(function () {
+            hour = parseInt(timer / 3600, 10);
+            minutes = parseInt(timer % 3600 / 60, 10);
+            seconds = parseInt(timer % 3600 % 60, 10);
+            hour = hour < 10 ? "0" + hour : hour;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.textContent = hour+":"+minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                timer=0;
+                clearSessionData();
+            }
+        }, 1000);
+    }
+    function clearSessionData() {
+  $.ajax({
+    url: "/Home/ClearSessionData",
+    type: "POST",
+    success: function(result) {
+      // Действия после удаления данных из сессии
+    }
+  });
+}
+    window.onload = function () {
+        //var duration = 90, // продолжительность таймера в секундах
+            display = document.querySelector('#timer'); // элемент, в котором будет отображаться таймер
+            var lastActive = "@duration";
+            console.log(lastActive)
+            var lastActiveTime = moment(lastActive, "DD.MM.YYYY hh:mm:ss");
+var now = moment();
+var elapsed = moment.duration(now.diff(lastActiveTime));
+
+startTimer(20-(elapsed.asSeconds()-10800), display); // вызываем функцию startTimer() в любом случае
+
+
+
+        
+    };
+</script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,157 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    // Получаем значение из сессии по ключу "key"
+   var name = Context.Session.GetString("name");
+   var type = Context.Session.GetString("type");
+}
+
+<p>Значение ключа "key": @name  @type</p>
+
+<head>
+    <title>Страница аутентификации</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function addNoise(ctx, canvas) {
+  const width = canvas.width;
+  const height = canvas.height;
+  const noise = 30;
+  const lineCount = 10;
+  const pointCount = 100;
+  
+  // draw random lines
+  for (let i = 0; i < lineCount; i++) {
+    ctx.beginPath();
+    ctx.moveTo(Math.random() * width, Math.random() * height);
+    ctx.lineTo(Math.random() * width, Math.random() * height);
+    ctx.lineWidth = Math.ceil(Math.random() * noise);
+    ctx.strokeStyle = 'rgba(0,0,0,' + Math.random() + ')';
+    ctx.stroke();
+  }
+  
+  // draw random points
+  for (let i = 0; i < pointCount; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random() * width, Math.random() * height, Math.ceil(Math.random() * noise / 2), 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(0,0,0,' + Math.random() + ')';
+    ctx.fill();
+  }
+}
+      function drawCaptcha() {
+  var canvas = document.getElementById("captchaCanvas");
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  var captchaLength = 6;
+  var captcha = "";
+  addNoise(ctx, canvas);
+  for (var i = 0; i < captchaLength; i++) {
+    captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  ctx.font = "bold 24px Arial";
+  ctx.fillStyle = "#333";
+  ctx.fillText(captcha, canvas.width / 2 - 50, canvas.height / 2 + 10);
+
+  // сохраняем значение капчи в сессию
+  session.setItem('captcha', captcha);
+  console.log(captcha)
+  document.getElementById("captchaInput").value = captcha;
+}
+    </script>
+  </head>
+  <body>
+    <h1>Страница аутентификации</h1>
+    <script>
+      let error = '';
+      let correct = '';
+      let user = '';
+      let pass = '';
+      let captcha = '';
+      let session = sessionStorage;
+       function checkForm(e) {
+  e.preventDefault();
+  user = document.getElementsByName('username')[0].value;
+  pass = document.getElementsByName('password')[0].value;
+  captcha = document.getElementsByName('captcha')[0].value;
+
+  if (!user || !pass || !captcha) {
+    error = 'Заполните все поля';
+  } else if (!checkCaptcha(captcha)) {
+    error = 'Неправильная капча';
+  } else {
+    const formData = new FormData(form);
+    fetch('/Home/auth', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(response => {
+    console.log(response);
+    var name = response.name;
+    var type = response.type;
+    if (name !== '' && type !== '') {
+        correct = 'Вы успешно вошли в систему';
+        session.setItem('user', user);
+        session.setItem('start_time', new Date().getTime());
+        window.location.href = '/Home';
+    } else {
+        error = 'Неправильный логин или пароль';
+    }
+})
+.catch(error => console.error(error));
+    
+  }
+  showMessages();
+}
+
+function checkCaptcha(input) {
+  var sessionCaptcha = session.getItem('captcha');
+  if (sessionCaptcha === input) {
+    // очищаем значение капчи в сессии
+    session.removeItem('captcha');
+    return true;
+  } else {
+    return false;
+  }
+}
+
+  function showMessages() {
+    const errorElem = document.getElementById('error');
+    const correctElem = document.getElementById('correct');
+    errorElem.style.color = 'red';
+    correctElem.style.color = 'green';
+
+    errorElem.innerText = error;
+    correctElem.innerText = correct;
+
+    error = '';
+    correct = '';
+  }
+
+  
+</script>
+<p id="error"></p>
+<p id="correct"></p>
+<form id="add-service-form">
+    <input type="hidden" id="captchaInput" name="captchaInput" value="">
+  <label>Имя пользователя:</label>
+  <input type="text" name="username" value="" required><br>
+  <label>Пароль:</label>
+  <input type="password" name="password" value="" required><br>
+  <label>Введите капчу:</label>
+  <input type="text" name="captcha" required><br>
+  <canvas id="captchaCanvas"></canvas>
+  <button type="button" onclick="drawCaptcha()">Обновить капчу</button><br>
+  <button type="submit">Войти</button>
+</form>
+<script>
+  const form = document.querySelector('#add-service-form');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    checkForm(event); // запускаем функцию checkForm
+  });
+</script>
+
+ </body>
+
+

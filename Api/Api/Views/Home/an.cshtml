@@ -1,0 +1,166 @@
+﻿@{
+}
+
+<head>
+  <meta charset="UTF-8">
+  <title>Формирование заказа</title>
+  <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/hpcc-js/wasm@3.3.8/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+
+  <script>function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('open');
+    const closeButton = modal.querySelector('.modal-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', closeModal);
+    }
+    document.addEventListener('keydown', closeModalOnEscape);
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('open');
+    const closeButton = modal.querySelector('.modal-close');
+    if (closeButton) {
+      closeButton.removeEventListener('click', closeModal);
+    }
+    document.removeEventListener('keydown', closeModalOnEscape);
+  }
+}
+
+function closeModalOnEscape(event) {
+  if (event.key === 'Escape') {
+    closeModal(event);
+  }
+}
+function drawCode() {
+    const canvas = document.getElementById('barcode');
+    JsBarcode(canvas, document.getElementById('barcode-input').value, {
+      format: 'CODE128',
+      width: 2,
+      height: 25.93,
+      margin: 0,
+      displayValue: false
+    });
+}
+</script>
+</head>
+<body>
+  <header>
+    <h1>Формирование заказа</h1>
+  </header>
+  <main>
+    <form id="order-form">
+      <div class="form-group">
+        <label for="barcode-input">Штрих-код пробирки:</label>
+        <input type="text" id="barcode-input" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="patient-input">ФИО пациента:</label>
+        <input type="text" id="patient-input" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="service-input">Услуга:</label>
+        <input type="text" id="service-input" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <button type="button" id="add-service-btn" class="btn">Добавить еще услугу</button>
+      </div>
+      <div class="form-group">
+        <button type="submit" id="submit-btn" class="btn btn-primary">Отправить</button>
+      </div>
+      <div class="form-group">
+      <button type="button" onclick="openModal('add-patient-modal')">Добавить пациэнта</button>
+      </div>
+      <div class="form-group">
+      <button type="button" onclick="openModal('add-service-modal')">Добавить услугу</button>
+      </div>
+      <div class="form-group">
+      <button type="button" onclick="drawCode()">Нарисовать штрих код</button>
+      </div>
+      <canvas id="barcode"></canvas>
+  
+    </form>
+  </main>
+
+  <!-- Модальное окно добавления пациента -->
+  <div id="add-patient-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Добавление пациента</h2>
+      <form id="add-patient-form">
+      <label for="patient-name">ФИО:</label>
+      <input type="text" id="patient-name" name="patient-name" required>
+
+      <label for="patient-birthdate">Дата рождения:</label>
+      <input type="date" id="patient-birthdate" name="patient-birthdate" required>
+
+      <label for="patient-passport-series">Серия паспорта:</label>
+      <input type="text" id="patient-passport-series" name="patient-passport-series" required>
+
+      <label for="patient-passport-number">Номер паспорта:</label>
+      <input type="text" id="patient-passport-number" name="patient-passport-number" required>
+
+      <label for="patient-phone">Телефон:</label>
+      <input type="tel" id="patient-phone" name="patient-phone" required>
+
+      <label for="patient-email">E-mail:</label>
+      <input type="email" id="patient-email" name="patient-email" required>
+
+      <label for="patient-policy-number">Номер полиса:</label>
+      <input type="text" id="patient-policy-number" name="patient-policy-number" required>
+
+      <label for="patient-policy-type">Тип полиса:</label>
+      <select id="patient-policy-type" name="patient-policy-type" required>
+        <option value="ОМС">ОМС</option>
+        <option value="ДМС">ДМС</option>
+      </select>
+
+      <label for="patient-insurance-company">Страховая компания:</label>
+      <select id="patient-insurance-company" name="patient-insurance-company" required>
+        <option value="Компания 1">Компания 1</option>
+        <option value="Компания 2">Компания 2</option>
+        <option value="Компания 3">Компания 3</option>
+      </select>
+
+      <button type="submit">Добавить</button>
+      <button type="button" onclick="closeModal('add-patient-modal')">Отмена</button>
+    </form>
+    </div>
+</div>
+<div id="add-service-modal" class="modal">
+  <div class="modal-content">
+    <h3>Добавить услугу</h3>
+   <form id="add-service-form">
+  <label for="service_name">Название услуги:</label>
+  <input type="text" id="service_name" name="service_name" required>
+
+  <label for="service_price">Стоимость:</label>
+  <input type="number" id="service_price" name="service_price" required>
+
+  <button type="submit">Добавить</button>
+  <button type="button" onclick="closeModal('add-service-modal')">Отмена</button>
+</form>
+  </div>
+</div>
+<script>
+  const form = document.querySelector('#add-service-form');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault(); // предотвращаем стандартное поведение формы
+    const formData = new FormData(form);
+    fetch('/Home/Log', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+  });
+</script>
+</body>

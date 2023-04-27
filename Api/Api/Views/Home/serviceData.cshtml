@@ -1,0 +1,122 @@
+﻿@page
+@using System.Data
+@using Api.Controllers
+@model BloodData
+
+<h2>Blood Data</h2>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+input[type=date] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+button[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button[type=submit]:hover {
+  background-color: #45a049;
+}
+</style>
+@using (Html.BeginForm("BloodData", "Home", FormMethod.Get))
+{
+    <div>
+        <label for="startDate">Start Date:</label>
+        <input type="date" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div>
+        <label for="endDate">End Date:</label>
+        <input type="date" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <button type="submit">Filter</button>
+}
+<button id="add-record-btn">Добавить запись</button>
+
+<!-- Модальное окно для добавления записи -->
+<div id="add-record-modal" style="display:none;">
+  <form asp-controller="Home" asp-action="AddService" method="post">
+   
+    <div>
+        <label>Service:</label>
+        <input type="text" name="Service" />
+    </div>
+    <div>
+        <label>Price:</label>
+        <input type="text" name="price" />
+    </div>
+    <button type="submit">Submit</button>
+</form>
+</div>
+
+<!-- Скрипт для открытия модального окна -->
+<script>
+  var addRecordBtn = document.getElementById('add-record-btn');
+  var addRecordModal = document.getElementById('add-record-modal');
+
+  addRecordBtn.addEventListener('click', function() {
+    addRecordModal.style.display = 'block';
+  });
+</script>
+
+@if (ViewBag.Table != null && ViewBag.Table.Rows.Count > 0)
+{
+    <table>
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Service</th>
+            <th>Price</th>
+            <th>actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (DataRow row in ViewBag.Table.Rows)
+        {
+            <tr>
+                <td>@row["Code"]</td>
+                <td>@row["Service"]</td>
+                <td>@row["Price"]</td>
+                <td>
+                   <form method="get" asp-action="Edit">
+    <input type="hidden" name="id" value="@row["Code"]" />
+    <button type="submit">Редактировать</button>
+</form>
+<form method="post" asp-action="DeleteService">
+    <input type="hidden" name="id" value="@row["Code"]" />
+    <button type="submit">Удалить</button>
+</form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+}
+else
+{
+    <p>No data found.</p>
+}
